@@ -17,3 +17,37 @@ The top-level element is the `builtin.module` operation. It contains a single re
 See:
 - [Language Reference](https://mlir.llvm.org/docs/LangRef/)
 - [Understanding the IR Structure](https://mlir.llvm.org/docs/Tutorials/UnderstandingTheIRStructure/)
+
+## Pipeline
+
+### Conversion
+
+The first step is to convert our module to the `llvm` dialect. To do this, we can use the `mlir-opt` tool:
+```bash
+mlir-opt fibonacci.mlir --convert-scf-to-llvm --convert-to-llvm -o fibonacci.llvm.mlir
+```
+
+### Translation
+
+Then, it can be translated to LLVMIR using the `mlir-translate` tool:
+```bash
+mlir-translate fibonacci.llvm.mlir --mlir-to-llvmir -o fibonacci.ll
+```
+
+### Compilation
+
+Now we can reuse the LLVM framework to compile it to an object file:
+```bash
+clang fibonacci.ll -Wno-override-module -c -o fibonacci.o
+```
+
+Finally, it can be linked as an executable file:
+```bash
+clang fibonacci.o -o fibonacci.out
+```
+
+The binary will return the fibonacci of the number of arguments
+```bash
+$ ./fibonacci.out 1 1 1; echo $?
+24
+```
