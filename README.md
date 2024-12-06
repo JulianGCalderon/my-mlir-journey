@@ -44,3 +44,14 @@ The binary will return the fibonacci of the number of arguments
 $ ./fibonacci.o 1 1 1; echo $?
 24
 ```
+
+## Advent of Code
+
+For some reason, I decided to attempt the advent of code in pure MLIR.
+
+```bash
+make ./advent-of-code-2024/day1-part1.o
+./advent-of-code-2024/day1-part1.o advent-of-code-2024/day1-part1.input
+```
+
+I managed to solve the first part, but I ended up using many stdlib functions

@@ -1,3 +1,4 @@
 *.llvm.mlir
 *.ll
 *.o
+advent-of-code-2024/*.input
