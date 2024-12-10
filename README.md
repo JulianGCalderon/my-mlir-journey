@@ -2,6 +2,8 @@ This repository attempts to document my journey throughout MLIR. It will contain
 
 ## Resources
 
+- https://mlir.llvm.org/docs/LangRef/
+- https://llvm.org/docs/LangRef.html
 - https://github.com/j2kun/mlir-tutorial
 
 ## Commands
