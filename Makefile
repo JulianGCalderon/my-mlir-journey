@@ -17,5 +17,5 @@ linking_main.out: linking_main.o linking_lib.o
 	clang $^ -o $@
 
 clean:
-	rm **/*.llvm.mlir **/*.ll **/*.o **/*.out
+	rm $(wildcard *.llvm.mlir) $(wildcard *.ll) $(wildcard *.o) $(wildcard *.out)
 .PHONY: clean
