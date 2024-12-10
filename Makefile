@@ -5,8 +5,11 @@
 	mlir-translate --mlir-to-llvmir $< -o $@
 
 %.o: %.ll
-	clang $< -O0 -Wno-override-module -o $@
+	clang $< -O0 -Wno-override-module -c -o $@
+
+%.out: %.o
+	clang $< -o $@
 
 clean:
-	rm **/*.llvm.mlir **/*.ll **/*.o
+	rm **/*.llvm.mlir **/*.ll **/*.o **/*.out
 .PHONY: clean

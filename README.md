@@ -31,17 +31,17 @@ mlir-opt fibonacci.mlir --convert-scf-to-cf --convert-cf-to-llvm --convert-to-ll
 
 Now we case reuse the llvm framework to compile it native code
 ```bash
-clang fibonacci.ll -Wno-override-module -o fibonacci.o
+clang fibonacci.ll -Wno-override-module -o fibonacci.out
 ```
 
 I automated the build process with Makefile
 ```bash
-make fibonacci.o
+make fibonacci.out
 ```
 
 The binary will return the fibonacci of the number of arguments
 ```bash
-$ ./fibonacci.o 1 1 1; echo $?
+$ ./fibonacci.out 1 1 1; echo $?
 24
 ```
 
@@ -50,8 +50,8 @@ $ ./fibonacci.o 1 1 1; echo $?
 For some reason, I decided to attempt the advent of code in pure MLIR.
 
 ```bash
-make ./advent-of-code-2024/day1-part1.o
-./advent-of-code-2024/day1-part1.o advent-of-code-2024/day1-part1.input
+make ./advent-of-code-2024/day1-part1.out
+./advent-of-code-2024/day1-part1.out advent-of-code-2024/day1-part1.input
 ```
 
 I managed to solve the first part, but I ended up using many stdlib functions
