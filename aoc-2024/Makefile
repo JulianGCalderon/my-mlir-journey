@@ -7,15 +7,12 @@
 %.o: %.ll
 	clang $< -O0 -Wno-override-module -g -c -o $@
 
-%.o: %.c
-	clang $< -O0 -Wno-override-module -g -c -o $@
-
 %.out: %.o
 	clang $< -o $@
 
-linking_main.out: linking_main.o linking_lib.o
-	clang $^ -o $@
-
 clean:
-	rm $(wildcard *.llvm.mlir) $(wildcard *.ll) $(wildcard *.o) $(wildcard *.out)
+	find . -name '*.llvm.mlir' -type f -delete
+	find . -name '*.ll'        -type f -delete
+	find . -name '*.o'         -type f -delete
+	find . -name '*.out'       -type f -delete
 .PHONY: clean

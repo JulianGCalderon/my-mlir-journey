@@ -1,0 +1,5 @@
+*.llvm.mlir
+*.ll
+*.o
+*.out
+*.input

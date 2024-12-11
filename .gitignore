@@ -1,5 +1,0 @@
-*.llvm.mlir
-*.ll
-*.o
-*.out
-advent-of-code-2024/*.input
