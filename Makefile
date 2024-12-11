@@ -1,14 +1,14 @@
 %.llvm.mlir: %.mlir
-	mlir-opt --convert-scf-to-cf --convert-cf-to-llvm --convert-to-llvm $< -o $@
+	mlir-opt --convert-scf-to-cf --convert-cf-to-llvm --convert-to-llvm --mlir-print-debuginfo $< -o $@
 
 %.ll: %.llvm.mlir
 	mlir-translate --mlir-to-llvmir $< -o $@
 
 %.o: %.ll
-	clang $< -O0 -Wno-override-module -c -o $@
+	clang $< -O0 -Wno-override-module -g -c -o $@
 
 %.o: %.c
-	clang $< -O0 -Wno-override-module -c -o $@
+	clang $< -O0 -Wno-override-module -g -c -o $@
 
 %.out: %.o
 	clang $< -o $@
