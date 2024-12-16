@@ -1,5 +1,7 @@
+#include "ast.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "print.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -26,6 +28,14 @@ int main(int argc, char **argv) {
 
   std::vector<Token> tokens = lex(source);
   print_tokens(tokens);
+
+  ParseResult<AST::Module> module = parse(tokens);
+  if (!module) {
+    std::cerr << "Syntax Error: " << module.error() << '\n';
+    exit(EXIT_FAILURE);
+  }
+
+  print_ast(module.value());
 
   return 0;
 }
