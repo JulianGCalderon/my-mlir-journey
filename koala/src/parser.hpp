@@ -22,6 +22,7 @@ private:
 
   Token peek_token();
   Token next_token();
+  ParseResult<Token> expect_token(Token::Kind);
   bool at_end();
 };
 

@@ -1,9 +1,8 @@
 #include "parser.hpp"
 #include "ast.hpp"
 #include "lexer.hpp"
-#include <__expected/unexpect.h>
-#include <__expected/unexpected.h>
 #include <cstdlib>
+#include <format>
 #include <optional>
 #include <string>
 
@@ -32,13 +31,25 @@ ParseResult<AST::Module> Parser::parse_module() {
 }
 
 ParseResult<AST::Define> Parser::parse_define() {
-  next_token(); // consume `define`
+  ParseResult<Token> token_result = expect_token(Token::Kind::Define);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
 
   Token name_token = next_token(); // get name
 
-  next_token(); // consume `(`
-  next_token(); // consume `)`
-  next_token(); // consume `{`
+  token_result = expect_token(Token::Kind::OpenParen);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
+  token_result = expect_token(Token::Kind::CloseParen);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
+  token_result = expect_token(Token::Kind::OpenBrace);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
 
   std::vector<AST::Statement> vector;
 
@@ -51,7 +62,10 @@ ParseResult<AST::Define> Parser::parse_define() {
     vector.push_back(stmt.value());
   }
 
-  next_token(); // consume `}`
+  token_result = expect_token(Token::Kind::CloseBrace);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
 
   return ParseResult<AST::Define>(AST::Define{
       .name = name_token.lexeme,
@@ -60,14 +74,20 @@ ParseResult<AST::Define> Parser::parse_define() {
 }
 
 ParseResult<AST::Statement> Parser::parse_statement() {
-  next_token(); // consume `return`
+  ParseResult<Token> token_result = expect_token(Token::Kind::Return);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
 
   ParseResult<AST::Expression> expression = parse_expression();
   if (!expression) {
     return std::unexpected(expression.error());
   }
 
-  next_token(); // consume `;`
+  token_result = expect_token(Token::Kind::SemiColon);
+  if (!token_result) {
+    return std::unexpected(token_result.error());
+  }
 
   AST::Statement statement{
       .kind = AST::Statement::Kind::Return,
@@ -78,7 +98,11 @@ ParseResult<AST::Statement> Parser::parse_statement() {
 }
 
 ParseResult<AST::Expression> Parser::parse_expression() {
-  Token integer_token = next_token(); // get integer
+  ParseResult<Token> integer_token_result = expect_token(Token::Kind::Integer);
+  if (!integer_token_result) {
+    return std::unexpected(integer_token_result.error());
+  }
+  Token integer_token = integer_token_result.value();
 
   AST::Expression expression = AST::Expression{
       .kind = AST::Expression::Kind::Integer,
@@ -90,4 +114,14 @@ ParseResult<AST::Expression> Parser::parse_expression() {
 
 Token Parser::peek_token() { return at_end() ? EndToken : tokens[current]; }
 Token Parser::next_token() { return at_end() ? EndToken : tokens[current++]; }
+ParseResult<Token> Parser::expect_token(Token::Kind kind) {
+  Token token = at_end() ? EndToken : tokens[current++];
+
+  if (token.kind != kind) {
+    return std::unexpected(
+        std::format("expected token of type {}, but got {}", kind, token.kind));
+  } else {
+    return ParseResult<Token>(token);
+  }
+}
 bool Parser::at_end() { return current >= tokens.size(); }
