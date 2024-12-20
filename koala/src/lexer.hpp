@@ -1,6 +1,7 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
+#include <expected>
 #include <format>
 #include <optional>
 #include <string>
@@ -56,8 +57,10 @@ private:
   std::string current_lexeme();
 };
 
+using LexResult = std::expected<std::vector<Token>, std::vector<Token>>;
+
 // Returns all the tokens in the given string
-std::vector<Token> lex(std::string);
+LexResult lex(std::string);
 
 template <> struct std::formatter<Token::Kind> {
   constexpr auto parse(auto &ctx) { return ctx.begin(); }

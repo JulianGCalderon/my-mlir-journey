@@ -1,4 +1,6 @@
 #include "lexer.hpp"
+#include <__expected/unexpected.h>
+#include <expected>
 
 Lexer::Lexer(std::string source) : source(source) {}
 
@@ -86,16 +88,25 @@ std::string Lexer::current_lexeme() {
   return source.substr(start, current - start);
 }
 
-std::vector<Token> lex(std::string source) {
+LexResult lex(std::string source) {
   Lexer lexer = {source};
 
   std::vector<Token> vector;
+  std::vector<Token> errors;
 
   Token token = lexer.next();
   while (token.kind != Token::Kind::End) {
-    vector.push_back(token);
+    if (token.kind == Token::Kind::Unknown) {
+      errors.push_back(token);
+    } else {
+      vector.push_back(token);
+    }
     token = lexer.next();
   };
 
-  return vector;
+  if (!errors.empty()) {
+    return std::unexpected(errors);
+  } else {
+    return vector;
+  }
 }

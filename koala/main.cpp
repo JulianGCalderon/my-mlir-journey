@@ -6,11 +6,12 @@
 #include <iostream>
 #include <sstream>
 
-void print_tokens(std::vector<Token> tokens) {
+std::string tokens_to_string(std::vector<Token> tokens) {
+  std::stringstream buffer;
   for (Token t : tokens) {
-    std::cout << static_cast<int>(t.kind) << ":" << t.lexeme << ' ';
+    buffer << static_cast<int>(t.kind) << ":" << t.lexeme << ' ';
   }
-  std::cout << '\n';
+  return buffer.str();
 }
 
 int main(int argc, char **argv) {
@@ -26,8 +27,15 @@ int main(int argc, char **argv) {
   buffer << file.rdbuf();
   std::string source = buffer.str();
 
-  std::vector<Token> tokens = lex(source);
-  print_tokens(tokens);
+  LexResult tokens_result = lex(source);
+  if (!tokens_result) {
+    std::cerr << "Syntax Error: " << tokens_to_string(tokens_result.error())
+              << "\n";
+    exit(EXIT_FAILURE);
+  }
+  std::vector<Token> tokens = tokens_result.value();
+
+  std::cout << tokens_to_string(tokens) << "\n";
 
   ParseResult<AST::Module> module = parse(tokens);
   if (!module) {
