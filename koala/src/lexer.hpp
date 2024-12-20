@@ -1,6 +1,7 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
+#include <format>
 #include <optional>
 #include <string>
 #include <vector>
@@ -57,5 +58,49 @@ private:
 
 // Returns all the tokens in the given string
 std::vector<Token> lex(std::string);
+
+template <> struct std::formatter<Token::Kind> {
+  constexpr auto parse(auto &ctx) { return ctx.begin(); }
+
+  auto format(const Token::Kind &obj, auto &ctx) const {
+    std::string name;
+    switch (obj) {
+    case Token::Kind::Identifier:
+      name = "Identifier";
+      break;
+    case Token::Kind::Integer:
+      name = "Integer";
+      break;
+    case Token::Kind::Define:
+      name = "Define";
+      break;
+    case Token::Kind::Return:
+      name = "Return";
+      break;
+    case Token::Kind::OpenParen:
+      name = "OpenParen";
+      break;
+    case Token::Kind::CloseParen:
+      name = "CloseParen";
+      break;
+    case Token::Kind::OpenBrace:
+      name = "OpenBrace";
+      break;
+    case Token::Kind::CloseBrace:
+      name = "CloseBrace";
+      break;
+    case Token::Kind::SemiColon:
+      name = "SemiColon";
+      break;
+    case Token::Kind::Unknown:
+      name = "Unknown";
+      break;
+    case Token::Kind::End:
+      name = "End";
+      break;
+    }
+    return std::format_to(ctx.out(), "{}", name);
+  }
+};
 
 #endif
