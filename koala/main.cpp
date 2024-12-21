@@ -1,4 +1,5 @@
 #include "ast.hpp"
+#include "codegen.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "print.hpp"
@@ -37,13 +38,18 @@ int main(int argc, char **argv) {
 
   std::cout << tokens_to_string(tokens) << "\n";
 
-  ParseResult<AST::Module> module = parse(tokens);
-  if (!module) {
-    std::cerr << "Syntax Error: " << module.error() << '\n';
+  ParseResult<AST::Module> module_result = parse(tokens);
+  if (!module_result) {
+    std::cerr << "Syntax Error: " << module_result.error() << '\n';
     exit(EXIT_FAILURE);
   }
+  AST::Module module = module_result.value();
 
-  print_ast(module.value());
+  print_ast(module);
+
+  CodeGen codegen;
+  codegen.build_module(module);
+  codegen.compile();
 
   return 0;
 }
