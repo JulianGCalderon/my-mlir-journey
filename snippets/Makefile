@@ -10,6 +10,9 @@
 %.out: %.o
 	clang $< -o $@
 
+linking_main.out: linking_main.o linking_lib.o
+	clang $^ -o $@
+
 clean:
 	find . -name '*.llvm.mlir' -type f -delete
 	find . -name '*.ll'        -type f -delete

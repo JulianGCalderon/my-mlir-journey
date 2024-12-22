@@ -51,3 +51,13 @@ The binary will return the fibonacci of the number of arguments
 $ ./fibonacci.out 1 1 1; echo $?
 24
 ```
+
+## Linking
+
+You can define extern functions and globals, and link them at compile/runtime, using the `llvm` or `func` dialect.
+```bash
+make linking_main.o linking_lib.o
+clang linking_lib.o linking_main.o -o linking_main.out
+```
+
+You could also link with stdlib (this is done by default).
