@@ -24,7 +24,7 @@ See:
 
 The first step is to convert our module to the `llvm` dialect. To do this, we can use the `mlir-opt` tool:
 ```bash
-mlir-opt fibonacci.mlir --convert-scf-to-llvm --convert-to-llvm -o fibonacci.llvm.mlir
+mlir-opt fibonacci.mlir --convert-scf-to-cf --convert-cf-to-llvm --convert-to-llvm -o fibonacci.llvm.mlir
 ```
 
 ### Translation
