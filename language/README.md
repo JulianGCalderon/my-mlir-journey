@@ -1,4 +1,4 @@
-# Snippets
+# Language
 
 This directory explores MLIR in its textual form, and how it's transformed to an executable object.
 
