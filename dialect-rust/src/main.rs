@@ -159,7 +159,7 @@ fn build_core_module(ctx: &'_ Context) -> Module<'_> {
 
             let result = block
                 .append_op_result(
-                    OperationBuilder::new("arith.addi", location)
+                    OperationBuilder::new("felt.add", location)
                         .add_operands(&[v1, v2])
                         .add_results(&[u32_type])
                         .build()
