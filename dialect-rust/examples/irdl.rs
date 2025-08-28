@@ -5,6 +5,7 @@ use melior::{
     ir::{
         Attribute, Block, BlockLike, Location, Module, Region, Type,
         attribute::{StringAttribute, TypeAttribute},
+        operation::OperationBuilder,
         r#type::FunctionType,
     },
     pass::{self, PassManager},
@@ -86,7 +87,13 @@ fn build_core_module(ctx: &'_ Context) -> Module<'_> {
                 .unwrap();
 
             let result = block
-                .append_op_result(arith::addf(block.arg(0).unwrap(), k1, location))
+                .append_op_result(
+                    OperationBuilder::new("cmath.add", location)
+                        .add_operands(&[block.arg(0).unwrap(), k1])
+                        .add_results(&[Type::float64(ctx)])
+                        .build()
+                        .unwrap(),
+                )
                 .unwrap();
 
             block.append_operation(func::r#return(&[result], location));
