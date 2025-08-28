@@ -20,13 +20,13 @@ fn main() {
 
     let mut dialect_module = build_dialect_module(&context);
     canonicalize(&context, &mut dialect_module);
-    println!("{}", dialect_module.as_operation());
+    eprintln!("{}", dialect_module.as_operation());
 
     load_irdl_dialects(&dialect_module);
 
     let mut core_module = build_core_module(&context);
     canonicalize(&context, &mut core_module);
-    println!("{}", core_module.as_operation());
+    eprintln!("{}", core_module.as_operation());
 }
 
 fn initialize_context() -> Context {
