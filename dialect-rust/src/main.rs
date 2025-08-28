@@ -3,10 +3,10 @@ use std::ptr;
 use melior::{
     Context,
     dialect::{
-        DialectRegistry, func, llvm,
+        DialectRegistry, func,
         ods::{irdl, pdl},
     },
-    helpers::{BuiltinBlockExt, GepIndex, LlvmBlockExt},
+    helpers::BuiltinBlockExt,
     ir::{
         Attribute, Block, BlockLike, Identifier, Location, Module, Region, Type,
         attribute::{
@@ -175,31 +175,18 @@ fn build_core_module(ctx: &'_ Context) -> Module<'_> {
     let module = Module::new(location);
 
     let u32_type: Type<'_> = IntegerType::new(ctx, 32).into();
-    let ptr_type: Type<'_> = llvm::r#type::pointer(ctx, 0);
 
     module.body().append_operation(func::func(
         ctx,
-        StringAttribute::new(ctx, "main"),
-        TypeAttribute::new(FunctionType::new(ctx, &[u32_type, ptr_type], &[u32_type]).into()),
+        StringAttribute::new(ctx, "entrypoint"),
+        TypeAttribute::new(FunctionType::new(ctx, &[u32_type, u32_type], &[u32_type]).into()),
         {
             let region = Region::new();
             let block =
-                region.append_block(Block::new(&[(u32_type, location), (ptr_type, location)]));
+                region.append_block(Block::new(&[(u32_type, location), (u32_type, location)]));
 
-            let argv = block.arg(1).unwrap();
-
-            let v1_ptr_ptr = block
-                .gep(ctx, location, argv, &[GepIndex::Const(1)], ptr_type)
-                .unwrap();
-            let v2_ptr_ptr = block
-                .gep(ctx, location, argv, &[GepIndex::Const(2)], ptr_type)
-                .unwrap();
-
-            let v1_ptr = block.load(ctx, location, v1_ptr_ptr, ptr_type).unwrap();
-            let v2_ptr = block.load(ctx, location, v2_ptr_ptr, ptr_type).unwrap();
-
-            let v1 = block.load(ctx, location, v1_ptr, u32_type).unwrap();
-            let v2 = block.load(ctx, location, v2_ptr, u32_type).unwrap();
+            let v1 = block.arg(1).unwrap();
+            let v2 = block.arg(1).unwrap();
 
             let result = block
                 .append_op_result(
