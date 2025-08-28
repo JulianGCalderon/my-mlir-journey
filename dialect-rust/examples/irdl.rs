@@ -15,12 +15,10 @@ use melior::{
     },
 };
 
-use melior::dialect::ods::irdl;
-
 fn main() {
     let context = initialize_context();
 
-    let mut dialect_module = build_dialect_module(&context);
+    let mut dialect_module = load_dialect_module(&context);
     canonicalize(&context, &mut dialect_module);
     println!("{}", dialect_module.as_operation());
 
@@ -44,25 +42,9 @@ fn initialize_context() -> Context {
     context
 }
 
-fn build_dialect_module(ctx: &'_ Context) -> Module<'_> {
-    let location = Location::unknown(ctx);
-    let module = Module::new(location);
-
-    module.body().append_operation(
-        irdl::dialect(
-            ctx,
-            {
-                let region = Region::new();
-                region.append_block(Block::new(&[]));
-                region
-            },
-            StringAttribute::new(ctx, "cmath"),
-            location,
-        )
-        .into(),
-    );
-
-    module
+fn load_dialect_module(ctx: &'_ Context) -> Module<'_> {
+    let source = include_str!("dialect.irdl");
+    Module::parse(ctx, source).unwrap()
 }
 
 fn build_core_module(ctx: &'_ Context) -> Module<'_> {
@@ -88,7 +70,7 @@ fn build_core_module(ctx: &'_ Context) -> Module<'_> {
 
             let result = block
                 .append_op_result(
-                    OperationBuilder::new("cmath.add", location)
+                    OperationBuilder::new("cmath.mul", location)
                         .add_operands(&[block.arg(0).unwrap(), k1])
                         .add_results(&[Type::float64(ctx)])
                         .build()
