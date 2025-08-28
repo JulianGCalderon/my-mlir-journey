@@ -15,10 +15,12 @@ use melior::{
     },
 };
 
+use melior::dialect::ods::irdl;
+
 fn main() {
     let context = initialize_context();
 
-    let mut dialect_module = load_dialect_module(&context);
+    let mut dialect_module = build_dialect_module(&context);
     canonicalize(&context, &mut dialect_module);
     println!("{}", dialect_module.as_operation());
 
@@ -42,9 +44,70 @@ fn initialize_context() -> Context {
     context
 }
 
-fn load_dialect_module(ctx: &'_ Context) -> Module<'_> {
-    let source = include_str!("dialect.irdl");
-    Module::parse(ctx, source).unwrap()
+fn build_dialect_module(ctx: &'_ Context) -> Module<'_> {
+    let location = Location::unknown(ctx);
+    let dialect_module = Module::new(location);
+
+    dialect_module.body().append_operation(
+        irdl::dialect(
+            ctx,
+            {
+                let region = Region::new();
+                let block = region.append_block(Block::new(&[]));
+
+                let irdl_attribute_type = Type::parse(ctx, "!irdl.attribute").unwrap();
+
+                block.append_operation(
+                    irdl::_operation(
+                        ctx,
+                        {
+                            let region = Region::new();
+                            let block = region.append_block(Block::new(&[]));
+
+                            let is_f64 = block
+                                .append_op_result(
+                                    irdl::is(
+                                        ctx,
+                                        irdl_attribute_type,
+                                        TypeAttribute::new(Type::float64(ctx)).into(),
+                                        location,
+                                    )
+                                    .into(),
+                                )
+                                .unwrap();
+
+                            let variadicity =
+                                Attribute::parse(ctx, "#irdl<variadicity_array[ single,  single]>")
+                                    .unwrap();
+                            block.append_operation(
+                                irdl::operands(ctx, &[is_f64, is_f64], variadicity, location)
+                                    .into(),
+                            );
+
+                            let variadicity =
+                                Attribute::parse(ctx, "#irdl<variadicity_array[ single ]>")
+                                    .unwrap();
+                            block.append_operation(
+                                irdl::results(ctx, &[is_f64], variadicity, location).into(),
+                            );
+
+                            region
+                        },
+                        StringAttribute::new(ctx, "mul"),
+                        location,
+                    )
+                    .into(),
+                );
+
+                region
+            },
+            StringAttribute::new(ctx, "cmath"),
+            location,
+        )
+        .into(),
+    );
+
+    dialect_module
 }
 
 fn build_core_module(ctx: &'_ Context) -> Module<'_> {

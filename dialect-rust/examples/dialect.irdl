@@ -1,9 +1,0 @@
-irdl.dialect @cmath {
-  irdl.operation @mul {
-    %0 = irdl.is f32
-    %1 = irdl.is f64
-    %2 = irdl.any_of(%0, %1)
-    irdl.operands(%2, %2)
-    irdl.results(%2)
-  }
-}
