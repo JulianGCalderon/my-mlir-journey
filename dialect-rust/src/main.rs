@@ -24,8 +24,8 @@ use melior::{
 };
 use mlir_sys::{
     MlirGreedyRewriteDriverConfig, mlirApplyPatternsAndFoldGreedily, mlirFreezeRewritePattern,
-    mlirPDLOperationTypeGet, mlirPDLPatternModuleFromModule, mlirPDLTypeTypeGet,
-    mlirPDLValueTypeGet, mlirRewritePatternSetFromPDLPatternModule,
+    mlirPDLAttributeTypeGet, mlirPDLOperationTypeGet, mlirPDLPatternModuleFromModule,
+    mlirPDLTypeTypeGet, mlirPDLValueTypeGet, mlirRewritePatternSetFromPDLPatternModule,
 };
 
 fn main() {
@@ -235,6 +235,8 @@ fn build_pattern_module(ctx: &'_ Context) -> Module<'_> {
 
                 let pdl_type_type = unsafe { Type::from_raw(mlirPDLTypeTypeGet(ctx.to_raw())) };
                 let pdl_value_type = unsafe { Type::from_raw(mlirPDLValueTypeGet(ctx.to_raw())) };
+                let pdl_attribute_type =
+                    unsafe { Type::from_raw(mlirPDLAttributeTypeGet(ctx.to_raw())) };
                 let pdl_operation_type =
                     unsafe { Type::from_raw(mlirPDLOperationTypeGet(ctx.to_raw())) };
 
@@ -283,7 +285,7 @@ fn build_pattern_module(ctx: &'_ Context) -> Module<'_> {
                             let region = Region::new();
                             let block = region.append_block(Block::new(&[]));
 
-                            let arith_addi_operation = block
+                            let addi_operation = block
                                 .append_op_result(
                                     OperationBuilder::new("pdl.operation", location)
                                         .add_operands(&[operand1, operand2, result])
@@ -307,9 +309,114 @@ fn build_pattern_module(ctx: &'_ Context) -> Module<'_> {
                                 )
                                 .unwrap();
 
+                            let addi_result = block
+                                .append_op_result(
+                                    OperationBuilder::new("pdl.result", location)
+                                        .add_operands(&[addi_operation])
+                                        .add_attributes(&[(
+                                            Identifier::new(ctx, "index"),
+                                            IntegerAttribute::new(
+                                                IntegerType::new(ctx, 32).into(),
+                                                0,
+                                            )
+                                            .into(),
+                                        )])
+                                        .add_results(&[pdl_value_type])
+                                        .build()
+                                        .unwrap(),
+                                )
+                                .unwrap();
+
+                            let k13_attribute = block
+                                .append_op_result(
+                                    OperationBuilder::new("pdl.attribute", location)
+                                        .add_attributes(&[(
+                                            Identifier::new(ctx, "value"),
+                                            IntegerAttribute::new(
+                                                IntegerType::new(ctx, 32).into(),
+                                                13,
+                                            )
+                                            .into(),
+                                        )])
+                                        .add_results(&[pdl_attribute_type])
+                                        .build()
+                                        .unwrap(),
+                                )
+                                .unwrap();
+
+                            let k13_operation = block
+                                .append_op_result(
+                                    OperationBuilder::new("pdl.operation", location)
+                                        .add_operands(&[k13_attribute, result])
+                                        .add_attributes(&[
+                                            (
+                                                Identifier::new(ctx, "opName"),
+                                                StringAttribute::new(ctx, "arith.constant").into(),
+                                            ),
+                                            (
+                                                Identifier::new(ctx, "operandSegmentSizes"),
+                                                DenseI32ArrayAttribute::new(ctx, &[0, 1, 1]).into(),
+                                            ),
+                                            (
+                                                Identifier::new(ctx, "attributeValueNames"),
+                                                ArrayAttribute::new(
+                                                    ctx,
+                                                    &[StringAttribute::new(ctx, "value").into()],
+                                                )
+                                                .into(),
+                                            ),
+                                        ])
+                                        .add_results(&[pdl_operation_type])
+                                        .build()
+                                        .unwrap(),
+                                )
+                                .unwrap();
+
+                            let k13 = block
+                                .append_op_result(
+                                    OperationBuilder::new("pdl.result", location)
+                                        .add_operands(&[k13_operation])
+                                        .add_attributes(&[(
+                                            Identifier::new(ctx, "index"),
+                                            IntegerAttribute::new(
+                                                IntegerType::new(ctx, 32).into(),
+                                                0,
+                                            )
+                                            .into(),
+                                        )])
+                                        .add_results(&[pdl_value_type])
+                                        .build()
+                                        .unwrap(),
+                                )
+                                .unwrap();
+
+                            let remui_operation = block
+                                .append_op_result(
+                                    OperationBuilder::new("pdl.operation", location)
+                                        .add_operands(&[addi_result, k13, result])
+                                        .add_attributes(&[
+                                            (
+                                                Identifier::new(ctx, "opName"),
+                                                StringAttribute::new(ctx, "arith.remui").into(),
+                                            ),
+                                            (
+                                                Identifier::new(ctx, "operandSegmentSizes"),
+                                                DenseI32ArrayAttribute::new(ctx, &[2, 0, 1]).into(),
+                                            ),
+                                            (
+                                                Identifier::new(ctx, "attributeValueNames"),
+                                                ArrayAttribute::new(ctx, &[]).into(),
+                                            ),
+                                        ])
+                                        .add_results(&[pdl_operation_type])
+                                        .build()
+                                        .unwrap(),
+                                )
+                                .unwrap();
+
                             block.append_operation(
                                 OperationBuilder::new("pdl.replace", location)
-                                    .add_operands(&[operation, arith_addi_operation])
+                                    .add_operands(&[operation, remui_operation])
                                     .add_attributes(&[(
                                         Identifier::new(ctx, "operandSegmentSizes"),
                                         DenseI32ArrayAttribute::new(ctx, &[1, 1, 0]).into(),
