@@ -1,12 +1,12 @@
 use melior::{
     Context,
-    dialect::{DialectRegistry, arith, func, llvm, ods::irdl},
-    helpers::{ArithBlockExt, BuiltinBlockExt, GepIndex, LlvmBlockExt},
+    dialect::{DialectRegistry, func, llvm, ods::irdl},
+    helpers::{BuiltinBlockExt, GepIndex, LlvmBlockExt},
     ir::{
         Attribute, Block, BlockLike, Location, Module, Region, Type,
         attribute::{StringAttribute, TypeAttribute},
         operation::OperationBuilder,
-        r#type::{FunctionType, IntegerType, MemRefType},
+        r#type::{FunctionType, IntegerType},
     },
     pass::{self, PassManager},
     utility::{
@@ -144,12 +144,15 @@ fn build_core_module(ctx: &'_ Context) -> Module<'_> {
 
             let argv = block.arg(1).unwrap();
 
-            let v1_ptr = block
-                .gep(ctx, location, argv, &[GepIndex::Const(0)], ptr_type)
-                .unwrap();
-            let v2_ptr = block
+            let v1_ptr_ptr = block
                 .gep(ctx, location, argv, &[GepIndex::Const(1)], ptr_type)
                 .unwrap();
+            let v2_ptr_ptr = block
+                .gep(ctx, location, argv, &[GepIndex::Const(2)], ptr_type)
+                .unwrap();
+
+            let v1_ptr = block.load(ctx, location, v1_ptr_ptr, ptr_type).unwrap();
+            let v2_ptr = block.load(ctx, location, v2_ptr_ptr, ptr_type).unwrap();
 
             let v1 = block.load(ctx, location, v1_ptr, u32_type).unwrap();
             let v2 = block.load(ctx, location, v2_ptr, u32_type).unwrap();
