@@ -1,8 +1,9 @@
 use dialect_rust::{
-    apply_pdl_patterns, canonicalize, convert_pdl_to_pdl_interop, core::build_core_module,
-    initialize_context, irdl::build_dialect_module, pdl::build_pattern_module,
+    apply_pdl_patterns, canonicalize, convert_pdl_to_pdl_interop, convert_to_llvm,
+    core::build_core_module, initialize_context, irdl::build_dialect_module,
+    pdl::build_pattern_module,
 };
-use melior::utility::load_irdl_dialects;
+use melior::{ExecutionEngine, utility::load_irdl_dialects};
 
 fn main() {
     let context = initialize_context();
@@ -24,4 +25,25 @@ fn main() {
     convert_pdl_to_pdl_interop(&context, &mut pattern_module);
     apply_pdl_patterns(&core_module, &pattern_module);
     println!("{}", core_module.as_operation());
+
+    convert_to_llvm(&context, &mut core_module);
+
+    {
+        let execution_engine = ExecutionEngine::new(&core_module, 0, &[], false);
+
+        let mut a: u64 = 1;
+        let mut b: u64 = 3;
+        let mut c: u64 = 0;
+        let mut arguments = [
+            &mut a as *mut u64 as *mut (),
+            &mut b as *mut u64 as *mut (),
+            &mut c as *mut u64 as *mut (),
+        ];
+        unsafe {
+            execution_engine
+                .invoke_packed("entrypoint", &mut arguments)
+                .unwrap()
+        }
+        println!("{} + {} = {}", a, b, c);
+    }
 }

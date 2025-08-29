@@ -44,6 +44,14 @@ pub fn convert_pdl_to_pdl_interop(ctx: &Context, module: &mut Module) {
     pass_manager.run(module).unwrap();
 }
 
+pub fn convert_to_llvm(context: &Context, module: &mut Module<'_>) {
+    let pass_manager = PassManager::new(context);
+    pass_manager.enable_verifier(true);
+    pass_manager.add_pass(pass::transform::create_canonicalizer());
+    pass_manager.add_pass(pass::conversion::create_to_llvm());
+    pass_manager.run(module).unwrap();
+}
+
 pub fn apply_pdl_patterns(target_module: &Module, pattern_module: &Module) {
     let pdl_module = unsafe { mlirPDLPatternModuleFromModule(pattern_module.to_raw()) };
     let rewrite_patterns = unsafe { mlirRewritePatternSetFromPDLPatternModule(pdl_module) };
