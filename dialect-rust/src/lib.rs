@@ -1,7 +1,7 @@
 use std::ptr;
 
 use melior::{
-    Context,
+    Context, ExecutionEngine,
     dialect::DialectRegistry,
     ir::Module,
     pass::{self, PassManager},
@@ -66,4 +66,22 @@ pub fn apply_pdl_patterns(target_module: &Module, pattern_module: &Module) {
             },
         )
     };
+}
+
+pub fn execute_entrypoint(module: &Module, mut a: u32, mut b: u32) -> u32 {
+    let execution_engine = ExecutionEngine::new(module, 0, &[], false);
+
+    let mut result: u32 = 0;
+    let mut arguments = [
+        &mut a as *mut u32 as *mut (),
+        &mut b as *mut u32 as *mut (),
+        &mut result as *mut u32 as *mut (),
+    ];
+    unsafe {
+        execution_engine
+            .invoke_packed("entrypoint", &mut arguments)
+            .unwrap()
+    }
+
+    result
 }
