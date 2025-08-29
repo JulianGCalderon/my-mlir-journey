@@ -15,8 +15,8 @@ pub fn load_core_module(ctx: &'_ Context) -> Module<'_> {
         ctx,
         r#"
         module {
-          func.func @entrypoint(%arg0: i32, %arg1: i32) -> i32 {
-            %0 = "felt.add"(%arg1, %arg1) : (i32, i32) -> i32
+          func.func @entrypoint(%arg0: i32, %arg1: i32) -> i32 attributes {llvm.emit_c_interface} {
+            %0 = "felt.add"(%arg0, %arg1) : (i32, i32) -> i32
             return %0 : i32
           }
         }"#,
