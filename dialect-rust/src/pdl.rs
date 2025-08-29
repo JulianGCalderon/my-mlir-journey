@@ -63,7 +63,8 @@ pub fn build_pattern_module(ctx: &'_ Context) -> Module<'_> {
     // the divisor.
     //
     // The benefit attribute states the expected benefit of applying the rewrite
-    // pattern.
+    // pattern. See https://mlir.llvm.org/docs/PatternRewriter/#introduction for
+    // more information.
     module.body().append_operation(
         melior::dialect::ods::pdl::PatternOperation::builder(ctx, location)
             .benefit(IntegerAttribute::new(IntegerType::new(ctx, 16).into(), 1))
