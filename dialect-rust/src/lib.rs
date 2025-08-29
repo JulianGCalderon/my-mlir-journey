@@ -30,6 +30,7 @@ pub fn initialize_context() -> Context {
     context
 }
 
+// The canonicalization pass can be used to check if the modules are valid.
 pub fn canonicalize(context: &Context, module: &mut Module<'_>) {
     let pass_manager = PassManager::new(context);
     pass_manager.enable_verifier(true);
