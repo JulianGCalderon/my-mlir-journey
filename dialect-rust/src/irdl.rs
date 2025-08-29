@@ -26,6 +26,9 @@ pub fn load_dialect_module(ctx: &'_ Context) -> Module<'_> {
     .unwrap()
 }
 
+/// Builds the dialect module using IRDL.
+///
+/// The built module should be equal to the one in `load_dialect_module`.
 pub fn build_dialect_module(ctx: &'_ Context) -> Module<'_> {
     let location = Location::unknown(ctx);
     let module = Module::new(location);
@@ -48,6 +51,8 @@ pub fn build_dialect_module(ctx: &'_ Context) -> Module<'_> {
                             let region = Region::new();
                             let block = region.append_block(Block::new(&[]));
 
+                            // The felt.add operation should only operate with
+                            // u32 values.
                             let is_u32 = block
                                 .append_op_result(
                                     irdl::is(
@@ -60,6 +65,15 @@ pub fn build_dialect_module(ctx: &'_ Context) -> Module<'_> {
                                 )
                                 .unwrap();
 
+                            // This operation specifies that the operation
+                            // receives two arguments, each an u32.
+                            //
+                            // The operands may be single, optional,
+                            // or variadic. To specify this, we use the
+                            // `variadicity_array` attribute. There is no
+                            // way to prograamatically  the variadicity_array
+                            // attribute, so we rely on the attribute parsing
+                            // logic.
                             block.append_operation(
                                 irdl::operands(
                                     ctx,
@@ -74,6 +88,11 @@ pub fn build_dialect_module(ctx: &'_ Context) -> Module<'_> {
                                 .into(),
                             );
 
+                            // This specifies that the operation returns a
+                            // single u32 value.
+                            //
+                            // Again, the result types may be variadic, so we
+                            // use the `variadicity_array` attribute.
                             block.append_operation(
                                 irdl::results(
                                     ctx,
