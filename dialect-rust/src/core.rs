@@ -10,6 +10,20 @@ use melior::{
     },
 };
 
+pub fn load_core_module(ctx: &'_ Context) -> Module<'_> {
+    Module::parse(
+        ctx,
+        r#"
+        module {
+          func.func @entrypoint(%arg0: i32, %arg1: i32) -> i32 {
+            %0 = "felt.add"(%arg1, %arg1) : (i32, i32) -> i32
+            return %0 : i32
+          }
+        }"#,
+    )
+    .unwrap()
+}
+
 pub fn build_core_module(ctx: &'_ Context) -> Module<'_> {
     let location = Location::unknown(ctx);
     let module = Module::new(location);
@@ -47,4 +61,30 @@ pub fn build_core_module(ctx: &'_ Context) -> Module<'_> {
     ));
 
     module
+}
+
+#[cfg(test)]
+mod test {
+    use melior::utility::load_irdl_dialects;
+
+    use crate::{
+        core::{build_core_module, load_core_module},
+        initialize_context,
+        irdl::build_dialect_module,
+    };
+
+    #[test]
+    fn equal_load_and_build() {
+        let context = initialize_context();
+
+        let dialect_module = build_dialect_module(&context);
+        load_irdl_dialects(&dialect_module);
+
+        let builded_module = build_core_module(&context);
+        let loaded_module = load_core_module(&context);
+        assert_eq!(
+            builded_module.as_operation().to_string(),
+            loaded_module.as_operation().to_string()
+        )
+    }
 }
