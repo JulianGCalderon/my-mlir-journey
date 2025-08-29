@@ -3,7 +3,7 @@ use melior::{
     dialect::func,
     helpers::BuiltinBlockExt,
     ir::{
-        Block, BlockLike, Location, Module, Region, Type,
+        Attribute, Block, BlockLike, Identifier, Location, Module, Region, Type,
         attribute::{StringAttribute, TypeAttribute},
         operation::OperationBuilder,
         r#type::{FunctionType, IntegerType},
@@ -39,7 +39,7 @@ pub fn build_core_module(ctx: &'_ Context) -> Module<'_> {
             let block =
                 region.append_block(Block::new(&[(u32_type, location), (u32_type, location)]));
 
-            let v1 = block.arg(1).unwrap();
+            let v1 = block.arg(0).unwrap();
             let v2 = block.arg(1).unwrap();
 
             let result = block
@@ -56,7 +56,10 @@ pub fn build_core_module(ctx: &'_ Context) -> Module<'_> {
 
             region
         },
-        &[],
+        &[(
+            Identifier::new(ctx, "llvm.emit_c_interface"),
+            Attribute::unit(ctx),
+        )],
         location,
     ));
 
