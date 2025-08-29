@@ -58,6 +58,12 @@ pub fn build_pattern_module(ctx: &'_ Context) -> Module<'_> {
     let pdl_operation_type = unsafe { Type::from_raw(mlirPDLOperationTypeGet(ctx.to_raw())) };
     let u32_type: Type<'_> = IntegerType::new(ctx, 32).into();
 
+    // We will define a single pattern, that rewrites the felt.add operation
+    // into an arith.addi, followed by a arith.remui with a constant value of 13 as
+    // the divisor.
+    //
+    // The benefit attribute states the expected benefit of applying the rewrite
+    // pattern.
     module.body().append_operation(
         melior::dialect::ods::pdl::PatternOperation::builder(ctx, location)
             .benefit(IntegerAttribute::new(IntegerType::new(ctx, 16).into(), 1))
