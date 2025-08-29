@@ -31,8 +31,8 @@ fn main() {
     {
         let execution_engine = ExecutionEngine::new(&core_module, 0, &[], false);
 
-        let mut a: u64 = 1;
-        let mut b: u64 = 3;
+        let mut a: u64 = 10;
+        let mut b: u64 = 7;
         let mut c: u64 = 0;
         let mut arguments = [
             &mut a as *mut u64 as *mut (),
